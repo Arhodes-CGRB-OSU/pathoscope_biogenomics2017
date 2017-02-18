@@ -1,6 +1,13 @@
-## Welcome to the Pre-Conference Workshop on Bioinformatics
+## Introduction to Metagenomic Data Analysis and Microbiome Characterization
 
-In this workshop, we will learn about two very actively developed disciplines in bioinformatics, phylogenetics and metagenomics. Firstly, we will learn how to use phylogenetics under a Bayesian Inference framework to infer the spread of an outbreak over time and space. We will even produce a GoogleEarth visualization to represent the movement of Hepatatis B virus over Eurasia and Africa. In the second half of the workshop, we will learn about metagenomics using the PathoScope platform and the PathoStats software.  
++ (3:30-4:00) Introduction to Metagenomics/Microbiome -> identifying strains  -> Pathoscope (Evan)
++ (4:00-4:45) Tutorial - running PathoScope MAP, PathoScope ID (Matthew)
++ (4:45-5:00) Break
++ (5:00-5:30) Making sense of the data -> batch effects, combat -> Hypothesis testing (Evan)
++ (5:30-6:15) Tutorial - BatchQC, PathoStat (Matthew)
++ (6:15-6:30) Wrap-up or concluding remarks (from organizers??)
 
-* [Continuous Phylogeography with BEAST 2.0](https://github.com/gwcbi/phylobang/blob/master/BEAST.md)  
-* [Metagenomics with PathoScope 2.0 and PathoStat](https://github.com/gwcbi/phylobang/blob/master/pathoscope.md)
+[Tutorial 1](PathoScope/README.md)
+
+[Tutorial 2](PathoStats/README.md)
+
