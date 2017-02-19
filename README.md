@@ -1,4 +1,4 @@
-## Introduction to Metagenomic Data Analysis and Microbiome Characterization
+# Introduction to Metagenomic Data Analysis
 
 + (3:30-4:00) Introduction to Metagenomics/Microbiome -> identifying strains  -> Pathoscope (Evan)
 + (4:00-4:45) Tutorial - running PathoScope MAP, PathoScope ID (Matthew)
@@ -7,7 +7,16 @@
 + (5:30-6:15) Tutorial - BatchQC, PathoStat (Matthew)
 + (6:15-6:30) Wrap-up or concluding remarks (from organizers??)
 
-[Tutorial 1](PathoScope/README.md)
+## Getting Started
 
-[Tutorial 2](PathoStats/README.md)
+There are a few tools you'll need to participate in today's workshop. This page contains instructions for installation.
+
+[Installation](install.md)
+
+## Tutorials
+
+[Tutorial 1: Characterizing microbial communities using PathoScope](PathoScope/pathoscope.md)
+
+[Tutorial 2: using PathoStat ](PathoStats/README.md)
+
 

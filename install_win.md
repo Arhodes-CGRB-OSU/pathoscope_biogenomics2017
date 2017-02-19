@@ -1,5 +1,6 @@
 ### Summary on how to install dependencies and run PathoScope2 on Windows machines  
 
+
 **Install Python in Windows**  
 * Go to -> https://www.python.org/downloads/windows/  
 * Search for -> "Python 2.7.13rc1 - 2016-12-04"  
