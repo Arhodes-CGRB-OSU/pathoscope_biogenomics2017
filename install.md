@@ -2,7 +2,7 @@
 
 The programs we will use in our tutorial today are are:
 
-+  **_PathoScope_** (including _PathoLIB_,  _PathoMAP_ and _PathoID_)
++  **_PathoScope_** (including _PathoLib_,  _PathoMap_ and _PathoId_)
 +  **_BatchQC_**, and 
 +  **_PathoStat_**
 

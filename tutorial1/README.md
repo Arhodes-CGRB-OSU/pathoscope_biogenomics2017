@@ -52,7 +52,7 @@ There are several ways you can get the taxonomy IDs and format your file in a wa
 
 Once we have this huge file, you can use **_PathoLib_** to subsample this big file and select only the taxa that you want.
 
-### Quick Exercise:
+### Exercise 1:
 
 ##### A strange virus has been infecting Blue Crabs in the Chesapeake Bay. One of our collaborators has performed a protocol to isolate and generate viral metagenome sequence libraries from infected crab gills. How can we create suitable target and filter databases for this data?
 
@@ -97,68 +97,90 @@ The target library is a collection of microbial genomes from the reference libra
 
 ## PathoMap
 
-
-### Getting data and reference genomes
 We are going to use data from a study exploring microbiome diversity in oropharingeal swabs from schizophrenia patients and healthy controls. The SRA accession number is `SRR1519057`. 
 
 ![SRA](https://github.com/ecastron/PS_demo/raw/master/img/img01.png)
 
-This file is probably too big for a demo so I randomly subsampled the reads down to a more manageable size (~40 M to 40 K reads)  
-* Go ahead and download the data [here](https://www.dropbox.com/s/dkfy5hcxfi7kvwq/ES_211.fastq?dl=1). If you are interested, sequences are part of [this study](https://peerj.com/articles/1140/)  
-* Now you need at least two files, one to be used as target library (where your reads are going to be mapped) and another one to be used as filter library (internal controls, host genome, contaminants, etc. that you want to remove)
+For this demo we are going to use a random subsample of the original data. The file should already be in `tutorial1` directory. If not, you can grab it from [here](https://www.dropbox.com/s/dkfy5hcxfi7kvwq/ES_211.fastq?dl=1). If you are interested, sequences are part of [this study](https://peerj.com/articles/1140/).
 
-As target library, you can use any multi fasta file containing full or draft genomes, or even nucleotide entries from NCBI, and combinations of both. The only condition is that the fasta entries start with the taxonomy ID from NCBI as follows:
+### Exercise 2:
 
-> Originally:  
-\>gi|40555938|ref|NC_005309.1| Canarypox virus, complete genome  
+##### Using the appropriate set of targets and filter databases, map the subsampled reads using PathoMap.
 
-> but PathoScope likes:  
-\>ti|44088|gi|40555938|ref|NC_005309.1| Canarypox virus, complete genome  
-
-You could do this very easily in **PathoLib**:
-
-		python pathoscope2.py LIB -genomeFile my_file.fasta -outPrefix target_library
+> HINT: `pathosuite MAP --help`
+> 
+> Also, make sure you are in the `tutorial1` directory
 
 
+[<img src="../img/pathomap_workflow.png" height=400>](../img/pathomap_workflow.png)
 
-### Let's map the reads
-Once you have your data and target and filter libraries, we are ready to go ahead with the mapping step. For this, we use bowtie2 so we will need to tell **PathoMap** where the bowtie2 indices are. If you don't have bowtie2 indices, not a problem, **PathoMap** will create them for you. And if your fasta files are larger than 4.6 GB (Bowtie2 limit), not a problem either, **PathoMap** will split your fasta files and create indices for each one of the resulting files.
 
-If you have fasta files and not bowtie2 indices:
+##### Answer:
 
-		python pathoscope2.py MAP -U ES_211.fastq -targetRefFiles HMP_ref_ti_0.fa,HMP_ref_ti_1.fa -filterRefFiles human.fa,phix174.fa  -outDir . -outAlign ES_211.sam  -expTag Bangladesh
+Run the pathoscope map command:
 
-But if you already have Bowtie2 indices (our case), you can issue the following command:
+```
+pathosuite MAP \
+    -U ES_211.fastq \
+    -indexDir databases \
+    -targetIndexPrefixes HMP_ref_ti_0,HMP_ref_ti_1 \
+    -filterIndexPrefixes genome,phix174 \
+    -outDir output \
+    -outAlign ES_211.sam \
+    -expTag bg2017
+```
 
-		python pathoscope2.py MAP -U ES_211.fastq -indexDir /Users/ecastron/Dropbox/14_workshops/Bangladesh/HMP  -targetIndexPrefixes HMP_ref_ti_0,HMP_ref_ti_1 -filterIndexPrefixes genome,phix174  -outDir . -outAlign ES_211.sam  -expTag Bangladesh
+If all goes well, in ~3 minutes you should see something like this:
 
-Let's give it a try...
+![PathoMap Output](../img/pathomap_output.png)
 
-![ps2](https://github.com/gwcbi/phylobang/raw/master/img/ps2.png)
+Here is a summary of our alignment:
 
-So that should have taken ~3 minutes to run. Now you have a number of things that were printed to the screen as well as files that were created. The summary of the STDOUT is:
-
-| Reads Mapped  | Library  | 
+| Library  | Reads Mapped  | 
 |:------------- | ---------------:|
-| 1053      | HMP\_ref\_ti\_0 |
-| 1132      | HMP\_ref\_ti\_1 |
-| 916 | genome |
-| 0 | phix174 |
+| HMP\_ref\_ti\_0 | 1053 |
+| HMP\_ref\_ti\_1 | 1132 |
+| genome | 916 |
+| phix174 | 0 |
 
-And you should have one .sam file per library, plus another file containing the reads mapped to all target libraries, a fastq file of the reads mapping to all targets, and the file you most care about: ES_211.sam
 
-![mapout](https://github.com/gwcbi/phylobang/raw/master/img/mapout.png)
+You will also notice that **_PathoMap_** created several output files:
 
-### Let's get a taxonomic profile from our .sam file
-The last step in our demo is to obtain a taxonomic profile from ES_211.sam using the read reassignment model implemented in **PathoID**
+![PathoMap Outfiles](../img/pathomap_outfiles.png)
 
-		python pathoscope2.py ID -alignFile ES_211.sam -fileType sam -outDir . -expTag DAV -thetaPrior 1000000
+There is one .sam file per library, plus another file containing the reads mapped to all target libraries, a fastq file of the reads mapping to all targets, and your final output: `ES_211.sam`.
 
-After running the command line above, you should get a tab-delimited file with **PathoScope's** output, and an updated .sam file representing an alignment after **PathoScope's** reassignment model was applied. The main output is the .tsv file. You can open this fle in a text editor or in Microsoft Excel.   
+## PathoID
 
-#### For your reference, the output generated by PathoScope in this example is [here](https://github.com/gwcbi/phylobang/tree/master/PS2_output)  
+Right now, we have an alignment (`ES_211.sam`) containing our first pass at assigning the reads to the correct genome. But what if two different OTUs have nearly identical sequences? How do we decide where the read came from?
 
-### Output TSV file format
+### Exercise 3:
+
+##### Use **_PathoID_** to obtain a final taxonomic profile from the aligned reads.
+
+> HINT: `pathosuite ID --help`
+
+[<img src="../img/pathoid_workflow.png" height=250>](../img/pathoid_workflow.png)
+
+##### Answer:
+
+Run the pathoscope ID command:
+
+```
+pathosuite ID \
+    -alignFile output/ES_211.sam \
+    -fileType sam \
+    -outDir output \
+    -expTag bg2017 \
+    -thetaPrior 1000000
+```
+
+Two important files are output by **_PathoID_**:
+
++ `output/updated_ES_211.sam` contains an updated alignment with reads assigned to the most likely source genome.
++ `output/bg2017-sam-report.tsv` is the main report file containing the taxonomic profiles, and can be opened with a text editor or spreadsheet program.
+
+#### Output TSV file format
 
 At the top of the file in the first row, there are two fields called "Total Number of Aligned Reads" and "Total Number of Mapped Genomes". They represent the total number of reads that are aligned and the total number of genomes to which those reads align to in the given alignment file.
 
