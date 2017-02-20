@@ -2,25 +2,22 @@
 
 ![banner](https://raw.githubusercontent.com/ecastron/PS_demo/master/img/banner.png)
 
-## Welcome! 👋🏼
 
+###### In this tutorial, we will learn how to obtain taxonomic profiles from metagenomic Next-Generation Sequencing data.
 
-In this tutorial, we will learn how to obtain taxonomic profiles from metagenomic Next-Generation Sequencing data. If you haven't already, .
-
-**_PathoScope2_** is a command line tool that is written in python. We run PathoScope by issuing commands in the Terminal and commandThe program is command line based so we need to use the Terminal in Unix-based systems such as Linux and Mac. On Windows machines, the syntax is the same, however, you have to make sure that you have PathoScope's dependencies installed and on your Environmental variable. Finally, you can check out a more in-depth tutorial in the **PathoScope** repo [here](https://github.com/PathoScope/PathoScope/raw/master/pathoscope2.0_v0.02_tutorial.pdf).
-
-
-For this part of the tutorial, we running programs in the PathoScope package through our docker image. To make this easier, we can set up an alias for calling PathoScope:
+To begin, we should have installed the **_PathoSuite_** Docker image by following [these instructions](../install.md). We are going to be running various **_PathoScope_** programs by issuing commands from our Terminal to our Docker container. To make the syntax a bit easier, we can set up an alias for calling PathoScope:
 
 ```bash
 alias pathosuite='docker run -ti -u rstudio -v $(pwd):/hostwd -w /hostwd --rm mlbendall/pathosuite pathoscope'
 ```
 
-The alias will disappear if you exit out of the terminal, Now, using your alias, check that everything is working:
+Now, using your alias, check that everything is working:
 
 ```bash
 pathosuite --help
 ```
+> NOTE: This alias will disappear if you exit out of the terminal, so if you log out you will need to cut-and-paste this again. 
+
 
 ### What PathoScope can do for you
 
@@ -29,6 +26,8 @@ There are 6 **PathoScope modules**, however, for this demo we will focus on the 
 - **_PathoLib_** - Allows users to automatically generate custom reference genome libraries for specific scenarios or datasets  
 - **_PathoMap_** - Aligns reads to target reference genome library and removes sequences that align to the filter and host libraries  
 - **_PathoID_** - Reassigns ambiguous reads, identifies microbial strains present in the sample, and estimates proportions of reads from each genome  
+
+<img src="../img/pathoscope_mods.png" height=100>
 
 Once you run your samples through **PathoScope**, you can easily import the output files into R for downstream exploratory data analysis and statistical inferences.  
 
@@ -39,44 +38,61 @@ One of the advantages of using **_PathoScope_** is the ability to easily customi
 + The **target** database is a collection of genomes that are closely related to the species or strains in your sample.
 + The **filter** database contains the sequences of possible contaminants, such as internal controls or host genome.
 
-The sequences in either library can be complete genomes, draft genomes (contigs), or other types of nucleotide sequences. For our production pipelines, we typically use either NCBI's RefSeq Genomes or (recently) NCBI Reference and Representative genomes. You are free to use any sequences you like, but the key is to have a unique ID for each OTU, and all sequences belonging to each OTU should be labeled with this ID. (Later on, in PathoID, we use these identifiers in our reassignment model). We find that the NCBI Taxonomy ID is a good identifier, and we can use this in subsequent analysis to get the full lineage for an OTU. 
+The sequences in either library can be complete genomes, draft genomes (contigs), or other types of nucleotide sequences. For our production pipelines, we typically use either NCBI's RefSeq Genomes or (recently) NCBI Reference and Representative genomes. You are free to use any sequences you like, but the key is to have a unique ID for each OTU, and all sequences belonging to each OTU should be labeled with this ID. (Later on, in PathoID, we use these identifiers in our reassignment model). We find that the NCBI Taxonomy ID is a good identifier, and we can use this in subsequent analysis to get the full lineage for an OTU.
+
+PathoScope expects the names in the reference database to contain the unique taxonomy ID formatted like this:
+
+> \>ti|44088|gi|40555938|ref|NC_005309.1| Canarypox virus, complete genome  
+
+But most of the NCBI FASTA downloads look like this:
+
+> \>gi|40555938|ref|NC_005309.1| Canarypox virus, complete genome  
+
+There are several ways you can get the taxonomy IDs and format your file in a way **_PathoScope_** understands. We offer a pre-formatted version of the NCBI nucleotide database for download [here] (ftp://pathoscope.bumc.bu.edu/data/nt_ti.fa.gz) (25.4 GB as of Feb. 2016).
+
+Once we have this huge file, you can use **_PathoLib_** to subsample this big file and select only the taxa that you want.
+
+### Quick Exercise:
+
+##### A strange virus has been infecting Blue Crabs in the Chesapeake Bay. One of our collaborators has performed a protocol to isolate and generate viral metagenome sequence libraries from infected crab gills. How can we create suitable target and filter databases for this data?
+
+> HINT: `pathosuite LIB --help`
 
 
+[<img src="../img/patholib_workflow.png" height=400>](../img/patholib_workflow.png)
 
-> Originally:  
-\>gi|40555938|ref|NC_005309.1| Canarypox virus, complete genome  
+##### Answer:
 
-> but PathoScope likes:  
-\>ti|44088|gi|40555938|ref|NC_005309.1| Canarypox virus, complete genome  
-
-
-customizing the output format of `blastdbcmd` using `-outfmt`:
-
-```
-blastdbcmd -db nt.00 -entry all -out - -outfmt ">ti|%T|gi|%g|ref|%a| %t##X##%s"
-```
-
-
-We also provide the NCBI nucleotide database already formatted [here] (ftp://pathoscope.bumc.bu.edu/data/nt_ti.fa.gz) (25.4 GB as of Feb. 2016). You could also use **PathoLib** to subsample this big file (50 GB uncompressed) and select only the taxa that you want. For instance, obtaining all the virus entries in nt_ti.fa (virus taxonomy ID = 10239)
-
-The **_PathoLib_** module is
-The purpose of the PathoLib module is to obtain reference sequences and to index these sequences for downstream analysis. 
-
-
-Alternatively, we provide the entire NCBI nucleotide database already formatted [here] (ftp://pathoscope.bumc.bu.edu/data/nt_ti.fa.gz) (10 GB file). You could also use **PathoLib** to subsample this big file (50 GB uncompressed) and select only the taxa that you want. For instance, obtaining all the virus entries in nt_ti.fa (virus taxonomy ID = 10239)
-
-		python pathoscope2.py -LIB python pathoscope.py LIB -genomeFile nt_ti.fa -taxonIds 10239 --subTax -outPrefix virus
-
-Or in order to create a filter library, say all human sequences:
-		
-		python  pathoscope2.py -LIB python pathoscope.py LIB -genomeFile nt_ti.fa -taxonIds 9606 --subTax -outPrefix human
-
-However, I'm providing a target and filter library already formatted that you can download [here](https://www.dropbox.com/s/7z2c8c2walg92yv/HMP.zip?dl=1), and [here for human](https://www.dropbox.com/s/nljz9cjoc5z43k8/human.zip?dl=1) and the [internal control](https://www.dropbox.com/s/sjy94bnxw6h4a6m/phix.zip?dl=1). The target library is a collection of genomes from the reference library of the Human Microbiome Project (description [here](http://hmpdacc.org/HMREFG/)), and the filter library is simply the human genome (hg19) plus the PhiX174 phage genome that Illumina uses as internal control, which may or may not be added to the sequencing experiment.  
-
-```bash
-wget ftp://ftp.ncbi.nih.gov/blast/db/16SMicrobial.tar.gz
+Check out the `-taxonIds` and `-excludeTaxonIds` 
 
 ```
+  -taxonIds LIB_TAXON_IDS
+                        Specify taxon ids of your interest with comma
+                        separated (if you have multiple taxon ids). If you do
+                        not specify this option, it will work on all entries
+                        in the reference file. For taxonomy id lookup, refer
+                        to http://www.ncbi.nlm.nih.gov/taxonomy
+  -excludeTaxonIds LIB_EXCLUDE_TAXON_IDS
+                        Specify taxon ids to exclude with comma separated (if
+                        you have multiple taxon ids to exclude).
+```
+
+After doing a couple of quick searches in NCBI taxonomy, we find that the taxonomy ID for all viruses is `ti:10239`.
+
+```
+pathoscope LIB -genomeFile nt_ti.fa -taxonIds 10239 --subTax -outPrefix virus
+```
+
+For the filter library, lets assume we can safely filter out any reads mapping to decapod crustacean sequences, `ti:6683`.
+
+```
+pathoscope LIB -genomeFile nt_ti.fa -taxonIds 6683 --subTax -outPrefix decapods
+```
+
+Building the reference database is usually quite time consuming, since **_PathoLib_** needs to download the NCBI taxonomy dump and go through the entire nt database.
+
+For todays exercise I've provided pre-formatted and pre-indexed reference databases in the [`tutorial1/databases`](./databases/README.md) directory. 
+The target library is a collection of microbial genomes from the reference library of the Human Microbiome Project (description [here](http://hmpdacc.org/HMREFG/)), and the filter library is simply the human genome (hg19) plus the PhiX174 phage genome that Illumina uses as internal control, which may or may not be added to the sequencing experiment.  
 
 
 ## PathoMap

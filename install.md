@@ -1,12 +1,12 @@
-# Installing for tutorial
+# Getting Started
 
-[Back](README.md)
+The programs we will use in our tutorial today are are:
 
-Our microbiome analysis workflows typically involve using _PathoScope_ to process sequence data from multiple sequencing runs in parallel on an
-[HPC cluster](https://research.gwu.edu/colonial-one-high-performance-computing)
-and then analyzing the results on 
++  **_PathoScope_** (including _PathoLIB_,  _PathoMAP_ and _PathoID_)
++  **_BatchQC_**, and 
++  **_PathoStat_**
 
-
+**_PathoScope_** is written in python and is used through the Terminal. On the other hand, **_BatchQC_** and **_PathoStat_** are interactive web applications written in R using the [Shiny](https://shiny.rstudio.com/) framework. There are quite a few sysadmin tasks needed to have everything working smoothly, so for today's tutorial, I've put together a Docker image so you can 
 
 
 ## Recommended Solution:
