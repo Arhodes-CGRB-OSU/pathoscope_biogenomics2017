@@ -1,33 +1,21 @@
-# PathoStat
+# Metagenome Analysis, Visualization, and Hypothesis Testing with BatchQC and PathoStat
 
-## Ready for the second half?
+###### In this tutorial, we will learn how to analyze and visualize taxonomic profiles across multiple samples, and use this data to test hypotheses.
 
+> Make sure you are in the `pathoscope_biogenomics2017` directory
 
-```bash
+> ```bash
 cd /path/to/pathoscope_biogenomics2017
 ```
 
-Next, we are going to use Docker to start up an Rstudio server container:
+For this tutorial, we are mainly going to be working in Rstudio and issuing commands through the R console. First, lets use our **pathosuite** Docker image to start up an Rstudio server container:
 
 ```bash
-docker run -p 8787:8787 -v tutorial2:/home/rstudio/tutorial2 mlbendall/pathosuite
+docker run -p 8787:8787 -v $(pwd)/tutorial2:/home/rstudio/tutorial2 mlbendall/pathosuite
 ```
 
 You should see something like this:
-
->```bash
-$ docker run -p 8787:8787 -v tutorial2:/home/rstudio/tutorial2 mlbendall/pathosuite
-[fix-attrs.d] applying owners & permissions fixes...
-[fix-attrs.d] 00-runscripts: applying...
-[fix-attrs.d] 00-runscripts: exited 0.
-[fix-attrs.d] done.
-[cont-init.d] executing container initialization scripts...
-[cont-init.d] conf: executing...
-[cont-init.d] conf: exited 0.
-[cont-init.d] done.
-[services.d] starting services
-[services.d] done.
-```
+![server running](../img/rstudio_server_wait.png)
 
 Rstudio is now running and can be accessed through your browser.
 
@@ -45,10 +33,9 @@ Open your browser and navigate to [`http://localhost:8787`](http://localhost:878
 See [this](../install.md) if you are installing PathoStat outside of Docker.
 
 
-## Exercise 1: Batch effects
+## Batch Effects: technical sources of variation
 
-In this first exercise we are going to learn how to recognize batch effects and how to
-control for them.
+In this first exercise we are going to learn how to recognize batch effects and how to control for them.
 
 In your R console, load the `BatchQC` package
 
@@ -65,13 +52,9 @@ vignette('BatchQC_examples', package='BatchQC')
 vignette('BatchQC_usage_advanced', package='BatchQC')
 ```
 
-### Experiment
+### Exercise 1:
 
-In this exercise, we are going to analyze the (simulated) data from a metagenomic timeseries experiment. Researchers collected samples for 5 weeks 
-
-```r
-
-```
+##### You have spent the past 5 weeks in Hawaii sampling volcanic soil after an eruption. Use BatchQC to visualize the data and identify any obvious trends in the microbial composition.
 
 Load the count matrix from the first experiment into _BatchQC_ like this:
 
@@ -79,9 +62,12 @@ Load the count matrix from the first experiment into _BatchQC_ like this:
 load("tutorial2/exercise1.Rdata")
 ```
 
-Go ahead and check out what the data looks like.
+This loads the data from two studies, `counts.ts1` and `counts.ts2`. Take a quick peek at the data to make sure it looks like what you are expecting...
 
-Now load the data into BatchQC:
+
+#### Timeseries 1:
+
+Load the timeseries 1 data into BatchQC:
 
 ```r
 batchQC(counts.ts1, samps.ts1$batch, condition=samps.ts1$cond)
@@ -89,53 +75,68 @@ batchQC(counts.ts1, samps.ts1$batch, condition=samps.ts1$cond)
 
 Take a few minutes to explore this data in BatchQC...
 
+##### Major conclusions to be made from data:
 
+1. ...
+2. ...
+
+
+<img src="../img/ts1_design.png" width=300>
+
+#### Timeseries 2:
+
+Load the timeseries 2 data into BatchQC:
 
 ```r
 batchQC(counts.ts2, samps.ts2$batch, condition=samps.ts2$cond)
 ```
 
+Take a few minutes to explore this data in BatchQC...
 
+##### Major conclusions to be made from data:
 
-
-
-<img src="../img/ts1_design.png" width=300>
-
+1. ...
+2. ...
 
 
 <img src="../img/ts2_design.png" width=300>
 
 
-```r
-library(PathoStat)
+## PathoStat: Metagenomic Visualization and Hypothesis Testing
 
+In this second exercise we are going to use PathoStat to visualize Metagenomic Timeseries data.
+
+In your R console, load the `PathoStat` package
 
 ```
+library(PathoStat)
+```
 
+Learn about the features of [PathoStat](https://github.com/mani2012/PathoStat)
 
+```
+vignette('PathoStatIntro', package='PathoStat')
+vignette("PathoStatUserManual", package='PathoStat')
+vignette("PathoStatAdvanced", package='PathoStat')
+```
 
-For the final part of this workshop, we need some pieces of software installed in our machines:  
+### Exercise 2:
 
-* [R](https://www.r-project.org) and [RStudio](https://www.rstudio.com/products/rstudio/download/) (Latest versions, all free)
-* [Bioconductor](http://www.bioconductor.org/install/)
-* [PathoStat](http://www.bioconductor.org/packages/release/bioc/html/PathoStat.html)
+##### We have collected metagenomic samples from the gut of two individuals over the course of 5 weeks. One of these individuals became infected with a gut bacteria, then got healthy again after treatment. Use PathoStat to identify the infected individual!
 
-In this part, we will use PathoStat to explore the taxonomic profiles of 10 metagenomic samples from two individuals obtained over five time points (weeks).  
-These samples come from two individuals, one of which became infected with a gut bacteria that after treatment got healthy again. The idea here is that using PathoStat you guess which individual is infected. Download PathoScope's output files from [here](https://github.com/gwcbi/phylobang/blob/master/tsv.zip?raw=true).  
+The taxonomic profile for each sample has been computed and is in the `tutorial2/exercise2` directory. Also, we have included a table, `sample_data.tsv`, containing the relevant sample data. (The data can be downloaded [here](https://github.com/gwcbi/phylobang/blob/master/tsv.zip?raw=true)).
 
-Let's run PathoStat. From the R console type:  
-	
-		setwd("~/Directory/tsv")
+Load the timeseries data into PathoStat:
 
-where `~/Directory/tsv` is the path to the directory where the provided PathoScope output is located (you have to unzip the downloaded file). Then, with only two lines of code you can execute PathoStat:  
+```r
+pstat <- createPathoStat(input_dir="tutorial2/exercise2",
+    sample_data_file="sample_data.tsv")
 
-First, creating a PathoStat object  
+runPathoStat(pstat)    
+```
 
-		pstat <- createPathoStat(input_dir=".", sample_data_file="sample_data.tsv")
-And then, executing the GUI with that object preloaded  
-		
-		runPathoStat(pstat)
-You should see something like:  
+Now, take a few minutes to explore this data in PathoStat...
+
 
 ![pstat](https://github.com/gwcbi/phylobang/raw/master/img/pstat.png)
 
@@ -145,9 +146,6 @@ The data is time-structured so you can explore the change in microbiome abundanc
 
 Since we are using a GUI, you can explore the program options by clicking on the tabs on top and selecting settings from the left-hand panel.
 
-#### Remember that you need to find what is infecting Subject H1!  
-
-This activity concludes our workshop. You probably feel that you have lots of questions and you can contact us at [eduardo.castro@unab.cl](mailto:eduardo.castro@unab.cl) and [kcrandall@gwu.edu](mailto:kcrandall@gwu.edu).  
   
     
      

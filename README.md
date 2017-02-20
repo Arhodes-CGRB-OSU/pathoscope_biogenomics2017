@@ -1,12 +1,11 @@
 # Introduction to Metagenomic Data Analysis
 
 + **3:30 - 4:00** Introduction to Metagenomics with Pathoscope - *Evan Johnson*
-+ **4:00 - 4:45** Tutorial - running PathoScope MAP, PathoScope ID (Matthew)
++ **4:00 - 4:45** [Tutorial 1: PathoScope](tutorial1/README.md) - *Matthew Bendall*
 + **4:45 - 5:00** ☕️ break
-+ **5:00 - 5:30** Making sense of the data -> batch effects, combat -> Hypothesis testing (Evan)
-+ **5:30 - 6:15** Tutorial - BatchQC, PathoStat (Matthew)
-+ **6:15 - 6:30** Wrap-up or concluding remarks (from organizers??)
-+ **6:30 -**  🍻
++ **5:00 - 5:30** Making sense of the data -> batch effects, combat -> Hypothesis testing *Evan*
++ **5:30 - 6:15** [Tutorial 2: BatchQC and PathoStat](tutorial2/README.md) *Matthew*
+
 
 ## Getting Started
 
